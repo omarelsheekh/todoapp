@@ -6,9 +6,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///db1'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db=SQLAlchemy(app)
 
+class Todo(db.Model):
+    __name__='todos'
+    id = db.Column(db.Integer , primary_key=True)
+    description = db.Column(db.String , nullable=True)
+    def __repr__(self):
+        return f'<Todo {self.id} {self.description}>'
+
+db.create_all()
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',data=Todo.query.all())
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=5000)
