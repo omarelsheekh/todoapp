@@ -1,5 +1,6 @@
 from flask import Flask,render_template,request,url_for,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
+import sys
 
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///db1'
@@ -21,14 +22,25 @@ def index():
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-    desc=request.get_json()['description']
-    item=Todo(description=desc)
-    db.session.add(item)
-    db.session.commit()
-    data = jsonify({
-        'description': item.description
-    })
-    return data
+    error=False
+    data={}
+    try:
+        desc=request.get_json()['description']
+        item=Todo(description=desc)
+        db.session.add(item)
+        db.session.commit()
+        data = jsonify({
+            'description': item.description
+        })
+    except:
+        db.session.rollback()
+        error=True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    
+    if not error:
+        return data
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True) #host='0.0.0.0' to make app available though the network
