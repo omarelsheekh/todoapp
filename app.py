@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template,request,url_for,redirect
 from flask_sqlalchemy import SQLAlchemy
 
 app=Flask(__name__)
@@ -19,5 +19,13 @@ db.create_all()
 def index():
     return render_template('index.html',data=Todo.query.all())
 
+@app.route('/todos/create', methods=['POST'])
+def create_todo():
+    desc=request.form.get('description','None')
+    item=Todo(description=desc)
+    db.session.add(item)
+    db.session.commit()
+    return redirect(url_for('index'))
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',port=5000)
+    app.run(port=5000, debug=True) #host='0.0.0.0' to make app available though the network
