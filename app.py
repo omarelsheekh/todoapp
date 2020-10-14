@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,url_for,redirect
+from flask import Flask,render_template,request,url_for,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app=Flask(__name__)
@@ -21,11 +21,14 @@ def index():
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-    desc=request.form.get('description','None')
+    desc=request.get_json()['description']
     item=Todo(description=desc)
     db.session.add(item)
     db.session.commit()
-    return redirect(url_for('index'))
+    data = jsonify({
+        'description': item.description
+    })
+    return data
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True) #host='0.0.0.0' to make app available though the network
