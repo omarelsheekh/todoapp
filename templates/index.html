@@ -15,12 +15,34 @@
         <br>
         <ul id="todos">
             {% for d in data %}
-                <li> <input id="check-{{ d.id }}" class="checkbox-complete" type="checkbox" {% if d.completed %} checked {% endif %}>
+                <li><input id="todocheck-{{ d.id }}" class="checkbox-complete" type="checkbox" {% if d.completed %} checked {% endif %}>
                     {{ d.description }} 
+                    <button id="todobutton-{{ d.id }}" class="cross-button">&cross;</button>
                 </li>
             {% endfor %}
         </ul>
         <script>
+            var crossButtons = document.getElementsByClassName('cross-button')
+            for(let i=0;i<crossButtons.length;i++){
+                button=crossButtons[i]
+                button.onclick= function(e){
+                    console.log(e)
+                    fetch('/todos/'+e.target.id+'/delete',{
+                        method : 'POST',
+                        headers :{
+                            'Content-Type' : 'application/json'
+                        }
+                    }).then(function(response){
+                        return response.json();
+                    }).then(function(jsonResponse){
+                        console.log(jsonResponse);
+                        document.getElementById(e.target.id).parentNode.remove()
+                    }).catch(function(){
+                        console.log("error happend")
+                    })
+
+                }
+            }
             var checkBoxes = document.getElementsByClassName('checkbox-complete');
             for(let i=0;i<checkBoxes.length;i++){
                 var checkbox=checkBoxes[i];
