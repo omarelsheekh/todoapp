@@ -15,10 +15,34 @@
         <br>
         <ul id="todos">
             {% for d in data %}
-                <li> {{ d.description }} </li>
+                <li> <input id="check-{{ d.id }}" class="checkbox-complete" type="checkbox" {% if d.completed %} checked {% endif %}>
+                    {{ d.description }} 
+                </li>
             {% endfor %}
         </ul>
         <script>
+            var checkBoxes = document.getElementsByClassName('checkbox-complete');
+            for(let i=0;i<checkBoxes.length;i++){
+                var checkbox=checkBoxes[i];
+                checkbox.onchange = function(e){
+                    console.log('event',e);
+                    fetch('/todos/'+e.target.id+'/completed',{
+                        method : 'POST',
+                        body : JSON.stringify({
+                            'completed' : e.target.checked
+                        }),
+                        headers :{
+                            'Content-Type' : 'application/json'
+                        }
+                    }).then(function(response){
+                        return response.json();
+                    }).then(function(jsonResponse){
+                        console.log(jsonResponse);
+                    }).catch(function(){
+                        console.log("error happend")
+                    })
+                }
+            }
             var form1=document.getElementById('form1');
             form1.onsubmit=function(e){
                 e.preventDefault();

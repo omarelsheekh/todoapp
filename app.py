@@ -44,5 +44,27 @@ def create_todo():
     if not error:
         return data
 
+@app.route('/todos/<todo_id>/completed', methods=['POST'])
+def edit_checked(todo_id):
+    error=False
+    data={}
+    try:
+        comp=request.get_json()['completed']
+        todo_id=todo_id.split('-')[1]
+        item=Todo.query.get(todo_id)
+        item.completed=comp
+        db.session.commit()
+        data = jsonify({
+            'completed': item.completed
+        })
+    except:
+        db.session.rollback()
+        error=True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if not error:
+        return data
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True) #host='0.0.0.0' to make app available though the network
