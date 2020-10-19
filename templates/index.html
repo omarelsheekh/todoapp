@@ -3,24 +3,50 @@
         <title>TODO App</title>
     </head>
     <body>
-        <form method="POST", id="form1">
-            <div>
-                <label>Create a Todo</label>
-                <input type="text", id="description", name="description">
-            </div>
-            <div>
-                <input type="submit", value="create">
-            </div>
-        </form>
+        <div id="lists_div">
+            <form method="POST", id="list_form">
+                <div>
+                    <label>Create a List</label>
+                    <input type="text", id="list_name", name="name">
+                </div>
+                <div>
+                    <input type="submit", value="create">
+                </div>
+            </form>
+            <br>
+            <ul id="lists">
+                {% for l in lists %}
+                    <li>
+                        <!-- <input id="listcheck-{{ l.id }}" class="list-checkbox-complete" type="checkbox" {% if False %} checked {% endif %}> -->
+                        <a href="/lists/{{ l.id }}">{{ l.name }}</a> 
+                        <!-- <button id="todobutton-{{ l.id }}" class="cross-button">&cross;</button> -->
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
         <br>
-        <ul id="todos">
-            {% for d in data %}
-                <li><input id="todocheck-{{ d.id }}" class="checkbox-complete" type="checkbox" {% if d.completed %} checked {% endif %}>
-                    {{ d.description }} 
-                    <button id="todobutton-{{ d.id }}" class="cross-button">&cross;</button>
-                </li>
-            {% endfor %}
-        </ul>
+        <div id="todos_div">
+            <h1>{{ current_list.name }}</h1>
+            <form method="POST", id="todo_form">
+                <div>
+                    <label>Create a Todo</label>
+                    <input type="text", id="description", name="description">
+                </div>
+                <div>
+                    <input type="submit", value="create">
+                </div>
+            </form>
+            <br>
+            <ul id="todos">
+                {% for d in todos %}
+                    <li><input id="todocheck-{{ d.id }}" class="todo-checkbox-complete" type="checkbox" {% if d.completed %} checked {% endif %}>
+                        {{ d.description }} 
+                        <button id="todobutton-{{ d.id }}" class="cross-button">&cross;</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
         <script>
             var crossButtons = document.getElementsByClassName('cross-button')
             for(let i=0;i<crossButtons.length;i++){
@@ -37,13 +63,13 @@
                     }).then(function(jsonResponse){
                         console.log(jsonResponse);
                         document.getElementById(e.target.id).parentNode.remove()
-                    }).catch(function(){
-                        console.log("error happend")
+                    }).catch(function(e){
+                        console.log(e)
                     })
 
                 }
             }
-            var checkBoxes = document.getElementsByClassName('checkbox-complete');
+            var checkBoxes = document.getElementsByClassName('todo-checkbox-complete');
             for(let i=0;i<checkBoxes.length;i++){
                 var checkbox=checkBoxes[i];
                 checkbox.onchange = function(e){
@@ -60,15 +86,15 @@
                         return response.json();
                     }).then(function(jsonResponse){
                         console.log(jsonResponse);
-                    }).catch(function(){
-                        console.log("error happend")
+                    }).catch(function(e){
+                        console.log(e)
                     })
                 }
             }
-            var form1=document.getElementById('form1');
-            form1.onsubmit=function(e){
+            var todo_form=document.getElementById('todo_form');
+            todo_form.onsubmit=function(e){
                 e.preventDefault();
-                fetch('/todos/create',{
+                fetch('/lists/{{ current_list.id }}/create',{
                     method : 'POST',
                     body : JSON.stringify({
                         'description' : document.getElementById('description').value
@@ -83,8 +109,31 @@
                     var listItem = document.createElement("li");
                     listItem.innerHTML = jsonResponse['description'];
                     document.getElementById("todos").appendChild(listItem)
-                }).catch(function(){
-                    console.log("error happend")
+                }).catch(function(e){
+                    console.log(e)
+                })
+            }
+            var list_form=document.getElementById('list_form');
+            list_form.onsubmit=function(e){
+                e.preventDefault();
+                fetch('/lists/create',{
+                    method : 'POST',
+                    body : JSON.stringify({
+                        'name' : document.getElementById('list_name').value
+                    }),
+                    headers :{
+                        'Content-Type' : 'application/json'
+                    }
+                }).then(function(response){
+                    return response.json();
+                }).then(function(jsonResponse){
+                    console.log(jsonResponse);
+                    var listLink = document.createElement("a");
+                    listLink.innerHTML = jsonResponse['name'];
+                    listLink.href='/lists/'+String(jsonResponse['id']);
+                    document.getElementById("lists").appendChild(listLink);
+                }).catch(function(e){
+                    console.log(e)
                 })
             }
         </script>
